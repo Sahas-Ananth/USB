@@ -4,6 +4,10 @@
 <xacro:include filename="$(find usb_description)/urdf/materials.xacro" />
 <xacro:include filename="$(find usb_description)/urdf/usb.trans" />
 <xacro:include filename="$(find usb_description)/urdf/usb.gazebo" />
+
+<xacro:property name="cameraSize" value="0.005"/>
+<xacro:property name="cameraMass" value="0.1"/>
+
 <link name="base_link">
   <inertial>
     <origin rpy="0 0 0" xyz="-6.998127749700094e-23 5.378861316410096e-05 0.023975572454417362"/>
@@ -53,14 +57,14 @@
     <inertia ixx="3.8e-05" ixy="0.0" ixz="0.0" iyy="2e-05" iyz="-0.0" izz="2e-05"/>
   </inertial>
   <visual>
-    <origin rpy="0 0 0" xyz="0.085 0.0 -0.024"/>
+    <origin rpy="0 0 0" xyz="0.085 0.0 0.0"/>
     <geometry>
       <mesh filename="package://usb_description/meshes/Wheel_1_1.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
-    <origin rpy="0 0 0" xyz="0.085 0.0 -0.024"/>
+    <origin rpy="0 0 0" xyz="0.085 0.0 0.0"/>
     <geometry>
       <mesh filename="package://usb_description/meshes/Wheel_1_1.stl" scale="0.001 0.001 0.001"/>
     </geometry>
@@ -74,38 +78,129 @@
     <inertia ixx="3.8e-05" ixy="0.0" ixz="0.0" iyy="2e-05" iyz="-0.0" izz="2e-05"/>
   </inertial>
   <visual>
-    <origin rpy="0 0 0" xyz="-0.085 -0.0 -0.024"/>
+    <origin rpy="0 0 0" xyz="-0.085 -0.0 0.0"/>
     <geometry>
       <mesh filename="package://usb_description/meshes/Wheel_2_1.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
-    <origin rpy="0 0 0" xyz="-0.085 -0.0 -0.024"/>
+    <origin rpy="0 0 0" xyz="-0.085 -0.0 0.0"/>
     <geometry>
       <mesh filename="package://usb_description/meshes/Wheel_2_1.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
 
-<joint name="Ball1" type="floating">
+<joint name="CastorJoint" type="fixed">
   <origin rpy="0 0 0" xyz="0.0 0.028388 0.009"/>
   <parent link="base_link"/>
   <child link="Castor_1"/>
 </joint>
 
 <joint name="Rev2" type="continuous">
-  <origin rpy="0 0 0" xyz="-0.085 0.0 0.024"/>
+  <origin rpy="0 0 0" xyz="-0.085 0.0 0.0"/>
   <parent link="base_link"/>
   <child link="Wheel_1_1"/>
-  <axis xyz="-1.0 -0.0 -0.0"/>
+  <axis xyz="1.0 -0.0 -0.0"/>
 </joint>
 
 <joint name="Rev3" type="continuous">
-  <origin rpy="0 0 0" xyz="0.085 0.0 0.024"/>
+  <origin rpy="0 0 0" xyz="0.085 0.0 0.0"/>
   <parent link="base_link"/>
   <child link="Wheel_2_1"/>
   <axis xyz="1.0 0.0 0.0"/>
 </joint>
+
+  <joint name="hokuyo_joint" type="fixed">
+    <axis xyz="0 1 0" />
+    <origin xyz=".0 0 .02" rpy="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="hokuyo"/>
+  </joint>
+
+  <!-- Hokuyo Laser -->
+  <link name="hokuyo">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+    <box size="0.01 0.01 0.01"/>
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://usb_description/meshes/hokuyo.dae" scale="0.3 0.3 0.3" />
+      </geometry>
+    </visual>
+
+    <inertial>
+      <mass value="1e-5" />
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+    </inertial>
+  </link>
+
+<link name = "Front_camera">
+  <collision>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.02 0.02 0.02"/>
+    </geometry>
+  </collision>
+
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.02 0.02 0.02"/>
+    </geometry>
+  </visual>
+
+    <inertial>
+      <mass value="0.1" />
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <box_inertia m="0.1" x="0.02" y="0.02" z="0.02" />
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+    </inertial>
+</link>
+
+<joint name="FCamJ" type="fixed">
+  <axis xyz="0 0 0"/>
+  <origin xyz="0 0.0 0.1" rpy="0 0 0"/>
+  <parent link="base_link"/>
+  <child link="Front_camera"/>
+</joint>
+
+<!-- <link name="camera">
+  <collision>
+    <origin xyz="0 0 0" rpy="1.5 0 0"/>
+    <geometry>
+      <box size="0.02 0.02 0.02"/>
+    </geometry>
+  </collision>
+
+  <visual>
+    <origin xyz="0 0 0" rpy="1.5 0 0"/>
+    <geometry>
+      <box size="0.02 0.02 0.02"/>
+    </geometry>
+    <material name="Gazebo/Green"/>
+  </visual>
+
+  <inertial>
+    <mass value="${cameraMass}" />
+    <origin xyz="0 0 0" rpy="1.5 0 0"/>
+    <box_inertia m="${cameraMass}" x="0.02" y="0.02" z="0.02" />
+    <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+  </inertial>
+</link>
+
+<joint name="camera_joint" type="fixed">
+  <axis xyz="0 1 0" />
+  <origin xyz="0 0.04 0" rpy="1.5 0 0"/>
+  <parent link="base_link"/>
+  <child link="camera"/>
+</joint> -->
 
 </robot>
